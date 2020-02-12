@@ -15,8 +15,9 @@
 	<body>
 
 		<script src="http://threejs.org/build/three.min.js"></script>
+		<script src="spheres.js"></script>
 		<script>
-
+		
 			var container;
 			var camera, scene, raycaster, renderer;
 
@@ -25,6 +26,7 @@
 
 			init();
 			render();
+			setcamera(20,10,3);
 			//animate();
 
 			function init() {
@@ -35,14 +37,15 @@
 				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
 
 				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x000000 );
+				scene.background = new THREE.Color( 0x0ff0f0 );
 
 				var light = new THREE.DirectionalLight( 0xffffff, 1 );
 				light.position.set( 1, 1, 1 ).normalize();
 				scene.add( light );
 
 				//var geometry = new THREE.BoxBufferGeometry( 20, 20, 20 );
-				var geometry = new THREE.SphereGeometry( 5, 32, 32 );
+				let d=10;
+				var geometry = new THREE.SphereGeometry( d/2, 32, 32 );
 
 				for ( var i = 0; i < 3; i ++ ) {
 
@@ -68,6 +71,15 @@
 					object2.position.z = -50;//Math.random();
 					scene.add( object2 );
 
+				}
+				let sphs=gridlines(9);
+				for (let sp of sphs.map.values()) {
+					let object3 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: sp.col } ) );
+					let xyz=sp.xyz();
+					object3.position.x = xyz[0]*d;
+					object3.position.y = xyz[1]*d;
+					object3.position.z = xyz[2]*d;
+					scene.add( object3 );
 				}
 
 				raycaster = new THREE.Raycaster();
@@ -107,10 +119,38 @@
 
 				render();
 			}
+			function setcamera(x,y,z){
+				camera.position.x = x;
+				camera.position.y = y;
+				camera.position.z = z;
+				/*camera.lookAt( scene.position );
 
+				camera.updateMatrixWorld();*/
+				render();
+			}
+			function rotate(th,ax){
+				let sinth=Math.sin(th);
+				let costh=Math.cos(th);
+				let v=[camera.position.x,camera.position.y,camera.position.z];
+				let m;
+				if (ax==0){
+					m=[[1,0,0],[0,costh,-sinth],[0,sinth,costh]];
+				} else if (ax==1){
+					m=[[costh,0,sinth],[0,1,0],[-sinth,0,costh]];
+				} else {
+					m=[[costh,-sinth,0],[sinth,costh,0],[0,0,1]];
+				}
+				let newx=camera.position.x*Math.cos(th)-camera.position.y*Math.sin(th);
+				let newy=camera.position.x*Math.sin(th)+camera.position.y*Math.cos(th);
+				let nv=matmul(m,v);
+				camera.position.x=nv[0];
+				camera.position.y=nv[1];
+				camera.position.z=nv[2];
+				render();
+			}
 			function render() {
 
-				/*theta += 0.1;
+				/*theta += 0.5;
 
 				camera.position.x = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
 				camera.position.y = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
