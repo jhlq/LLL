@@ -13,20 +13,52 @@
 		</style>
 	</head>
 	<body>
+		<div class="controls">
+			<input type="range" min="0" max="1000" value="500" class="slider" id="xrotation">
+			<input type="range" min="0" max="1000" value="500" class="slider" id="yrotation">
+			<input type="range" min="0" max="1000" value="500" class="slider" id="zrotation">
+			<input type="range" min="0" max="1000" value="500" class="slider" id="zoom">
+		</div>
 
 		<script src="http://threejs.org/build/three.min.js"></script>
 		<script src="spheres.js"></script>
 		<script>
+			var sliderx = document.getElementById("xrotation");
+			sliderx.prevvalue=500;
+			sliderx.oninput = function() {
+				rotate((this.value-this.prevvalue)*Math.PI/500,0);
+				this.prevvalue=this.value;
+			} 
+			var slidery = document.getElementById("yrotation");
+			slidery.prevvalue=500;
+			slidery.oninput = function() {
+				rotate((this.value-this.prevvalue)*Math.PI/500,1);
+				this.prevvalue=this.value;
+			} 
+			var sliderz = document.getElementById("zrotation");
+			sliderz.prevvalue=500;
+			sliderz.oninput = function() {
+				rotate((this.value-this.prevvalue)*Math.PI/500,2);
+				this.prevvalue=this.value;
+			} 
+			var sliderzoom = document.getElementById("zoom");
+			sliderzoom.prevvalue=500;
+			sliderzoom.oninput = function() {
+				zoom((this.value-this.prevvalue)/100);
+				this.prevvalue=this.value;
+			} 
 		
 			var container;
 			var camera, scene, raycaster, renderer;
 
 			var mouse = new THREE.Vector2(), INTERSECTED;
 			var radius = 100, theta = 0;
+			let objmap=new Map();
 
 			init();
 			render();
-			setcamera(20,10,3);
+			//setcamera(20,10,3);
+			setcamera(0,0,100);
 			//animate();
 
 			function init() {
@@ -73,6 +105,8 @@
 
 				}
 				let sphs=gridlines(9);
+				//let sphs=new Spheres();
+				sphs.addshell(0x000000);
 				for (let sp of sphs.map.values()) {
 					let object3 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: sp.col } ) );
 					let xyz=sp.xyz();
@@ -80,6 +114,7 @@
 					object3.position.y = xyz[1]*d;
 					object3.position.z = xyz[2]*d;
 					scene.add( object3 );
+					objmap.set(String(sp.loc),object3);
 				}
 
 				raycaster = new THREE.Raycaster();
@@ -140,21 +175,26 @@
 				} else {
 					m=[[costh,-sinth,0],[sinth,costh,0],[0,0,1]];
 				}
-				let newx=camera.position.x*Math.cos(th)-camera.position.y*Math.sin(th);
-				let newy=camera.position.x*Math.sin(th)+camera.position.y*Math.cos(th);
 				let nv=matmul(m,v);
 				camera.position.x=nv[0];
 				camera.position.y=nv[1];
 				camera.position.z=nv[2];
 				render();
 			}
+			function zoom(frac){
+				let fac=1-frac;
+				if (fac<=0) return;
+				camera.position.x*=fac;
+				camera.position.y*=fac;
+				camera.position.z*=fac;
+				render();
+			}
+			function setcolor(loc,col){
+				objmap.get(String(loc)).material.color.setHex(col);
+				render();
+			}
 			function render() {
 
-				/*theta += 0.5;
-
-				camera.position.x = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
-				camera.position.y = radius * Math.sin( THREE.MathUtils.degToRad( theta ) );
-				camera.position.z = radius * Math.cos( THREE.MathUtils.degToRad( theta ) );*/
 				camera.lookAt( scene.position );
 
 				camera.updateMatrixWorld();
