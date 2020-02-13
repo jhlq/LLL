@@ -2,26 +2,29 @@ class Screen {
 	constructor(){
 		this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
 		this.scene = new THREE.Scene();
+		this.renderer = new THREE.WebGLRenderer();
 		this.objmap=new Map();
 		this.halt=false;
+		this.d=1;
+		this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 	}
 	animate() {
-		if (this.halt) return;
-		requestAnimationFrame( animate );
-		render();
+		if (screen.halt) return;
+		requestAnimationFrame( screen.animate );
+		screen.render();
 	}
 	setcamera(x,y,z){
-		camera.position.x = x;
-		camera.position.y = y;
-		camera.position.z = z;
-		/*camera.lookAt( scene.position );
-		camera.updateMatrixWorld();*/
-		render();
+		this.camera.position.x = x;
+		this.camera.position.y = y;
+		this.camera.position.z = z;
+		/*this.camera.lookAt( scene.position );
+		this.camera.updateMatrixWorld();*/
+		this.render();
 	}
 	rotate(th,ax){
 		let sinth=Math.sin(th);
 		let costh=Math.cos(th);
-		let v=[camera.position.x,camera.position.y,camera.position.z];
+		let v=[this.camera.position.x,this.camera.position.y,this.camera.position.z];
 		let m;
 		if (ax==0){
 			m=[[1,0,0],[0,costh,-sinth],[0,sinth,costh]];
@@ -31,29 +34,29 @@ class Screen {
 			m=[[costh,-sinth,0],[sinth,costh,0],[0,0,1]];
 		}
 		let nv=matmul(m,v);
-		camera.position.x=nv[0];
-		camera.position.y=nv[1];
-		camera.position.z=nv[2];
-		render();
+		this.camera.position.x=nv[0];
+		this.camera.position.y=nv[1];
+		this.camera.position.z=nv[2];
+		this.render();
 	}
 	zoom(frac){
 		let fac=1-frac;
 		if (fac<=0) return;
-		camera.position.x*=fac;
-		camera.position.y*=fac;
-		camera.position.z*=fac;
-		render();
+		this.camera.position.x*=fac;
+		this.camera.position.y*=fac;
+		this.camera.position.z*=fac;
+		this.render();
 	}
 	setcolor(loc,col){
-		objmap.get(String(loc)).material.color.setHex(col);
-		render();
+		this.objmap.get(String(loc)).material.color.setHex(col);
+		this.render();
 	}
 	render() {
-		camera.lookAt( scene.position );
-		camera.updateMatrixWorld();
-		// find intersections
-		/*raycaster.setFromCamera( mouse, camera );
-		var intersects = raycaster.intersectObjects( scene.children );
+		this.camera.lookAt( this.scene.position );
+		this.camera.updateMatrixWorld();
+		// find intersections. Requires offset calculations.
+		/*raycaster.setFromCamera( mouse, this.camera );
+		var intersects = raycaster.intersectObjects( this.scene.children );
 		if ( intersects.length > 0 ) {
 			if ( INTERSECTED != intersects[ 0 ].object ) {
 				if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
@@ -65,6 +68,6 @@ class Screen {
 			if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 			INTERSECTED = null;
 		}*/
-		renderer.render( scene, camera );
+		this.renderer.render( this.scene, this.camera );
 	}
 }

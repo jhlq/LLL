@@ -10,10 +10,9 @@ class Sphere {
 	xyz() {
 		let x=this.loc[0]+this.loc[1]/2-this.loc[2]/2;
 		let h=Math.sqrt(3)/2;
-		let y=this.loc[1]*h-this.loc[2]*h/2;
-		let g=h/3;//(1/4-h**2)/-2*h;
-		let z=this.loc[2]*Math.sqrt(h**2-g**2);
-		//let h=Math.sqrt(3)/2;let y=0.5;let g=(1/4-h**2)/-2*h;g=h/3;let hp=Math.sqrt(h**2-g**2);
+		let y=this.loc[1]*h-this.loc[2]*h/3;
+		let hz=Math.sqrt(6)/3;
+		let z=this.loc[2]*hz;
 		return [x,y,z];
 	}
 };
@@ -72,6 +71,21 @@ class Spheres {
 		let adjs=this.adjacentSpace();
 		for (let loc of adjs){
 			this.map.set(String(loc),new Sphere(loc,col));
+		}
+	}
+	addshells(n,col){
+		for (let i=0;i<n;i++){
+			this.addshell(col);
+		}
+	}
+	addgridlines(n){
+		for (let i=0;i<n;i++){
+			this.add([i+1,0,0],0xff0000);
+			this.add([0,i+1,0],0x00ff00);
+			this.add([0,0,i+1],0x0000ff);
+			this.add([-(i+1),0,0],0x6f0000);
+			this.add([0,-(i+1),0],0x006f00);
+			this.add([0,0,-(i+1)],0x00006f);
 		}
 	}
 };
