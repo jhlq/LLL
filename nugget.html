@@ -61,7 +61,7 @@
 			init();
 			//screen.render();
 			//setcamera(20,10,3);
-			screen.setcamera(50,10,80);
+			screen.setcamera(5,0,8);
 			//animate();
 			togglerender();
 
@@ -82,12 +82,13 @@
 				light.position.set( - 1, - 1, - 1 );
 				screen.scene.add( light );
 
-				screen.d=10;
-				var geometry = new THREE.SphereGeometry( screen.d/2, 32, 32 );
+				//screen.d=10;
+				//var geometry = new THREE.SphereGeometry( screen.d/2, 32, 32 );
 				let sphs=new Spheres();
 				sphs.addshells(3);
 				sphs.addgridlines(9);
-				for (let sp of sphs.map.values()) {
+				screen.addspheres(sphs);
+				/*for (let sp of sphs.map.values()) {
 					let object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: sp.col } ) );
 					let xyz=sp.xyz();
 					object.position.x = xyz[0]*screen.d;
@@ -95,9 +96,9 @@
 					object.position.z = xyz[2]*screen.d;
 					screen.scene.add( object );
 					screen.objmap.set(String(sp.loc),object);
-				}
+				}*/
 
-				raycaster = new THREE.Raycaster();
+				//raycaster = new THREE.Raycaster();
 
 				screen.renderer.setPixelRatio( window.devicePixelRatio );
 				screen.renderer.setSize( window.innerWidth, window.innerHeight );

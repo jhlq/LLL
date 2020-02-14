@@ -1,12 +1,66 @@
 class Screen {
-	constructor(){
+	constructor(d){
 		this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
 		this.scene = new THREE.Scene();
 		this.renderer = new THREE.WebGLRenderer();
+		this.d=d||1;
+		this.spgeometry = new THREE.SphereGeometry( this.d/2, 32, 32 );
 		this.objmap=new Map();
+		this.spheres=new Spheres();
 		this.halt=false;
-		this.d=1;
 		this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+		this.cursor=[0,0,0];
+		this.marked=[];
+	}
+	addspheres(spheres){
+		for (let sp of spheres.map.values()){
+			if (this.spheres.add(sp)){
+				let object = new THREE.Mesh( this.spgeometry, new THREE.MeshLambertMaterial( { color: sp.col } ) );
+				let xyz=sp.xyz();
+				object.position.x = xyz[0]*this.d;
+				object.position.y = xyz[1]*this.d;
+				object.position.z = xyz[2]*this.d;
+				this.scene.add( object );
+				this.objmap.set(String(sp.loc),object);
+			}
+		}
+	}
+	mark(loc,col){
+		this.setemissive(loc,col||0xff);
+		this.marked.push(loc);
+	}
+	unmark(){
+		for (let loc of this.marked){
+			this.setemissive(loc,0);
+		}
+		this.marked=[];
+	}
+	cursormark(){
+		this.unmark();
+		for (let ad of this.spheres.adjacentSpheres(this.cursor)){
+			this.mark(ad);
+		}
+	}
+	movecursor(dir){
+		if (typeof(dir)=="number") dir=this.spheres.directions[dir];
+		let nc=[this.cursor[0]+dir[0],this.cursor[1]+dir[1],this.cursor[2]+dir[2]];
+		if (this.spheres.has(this.cursor)){
+			for (let i=0;i<1000;i++){
+				if (!this.spheres.has(nc)){
+					this.cursor=nc;
+					this.cursormark();
+					return true;
+				}
+				nc[0]+=dir[0];nc[1]+=dir[1];nc[2]+=dir[2];
+			}
+		} else {
+			if (this.spheres.isadjacent(nc)){
+				this.cursor=nc;
+				this.cursormark();
+				return true;
+			}
+		}
+		return false;
 	}
 	animate() {
 		if (screen.halt) return;
@@ -49,6 +103,10 @@ class Screen {
 	}
 	setcolor(loc,col){
 		this.objmap.get(String(loc)).material.color.setHex(col);
+		this.render();
+	}
+	setemissive(loc,col){
+		this.objmap.get(String(loc)).material.emissive.setHex(col);
 		this.render();
 	}
 	render() {

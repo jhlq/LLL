@@ -20,7 +20,7 @@ class Sphere {
 class Spheres {
 	constructor(d) {
 		this.map=new Map();
-		this.map.set(String([0,0,0]),new Sphere([0,0,0]));
+		//this.map.set(String([0,0,0]),new Sphere([0,0,0]));
 		this.d=d||1;
 		this.connections=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[1,-1,0],[-1,1,0], [0,0,1],[1,0,1],[0,1,1],[0,0,-1],[-1,0,-1],[0,-1,-1]];
 	}
@@ -28,8 +28,14 @@ class Spheres {
 		return this.map.has(String(loc));
 	}
 	add(loc,col){
-		if (this.map.has(String(loc))) return false;
-		this.map.set(String(loc),new Sphere(loc,col));
+		let sp=0;
+		if (loc.loc!=undefined){
+			sp=loc;
+		} else {
+			sp=new Sphere(loc,col);
+		}
+		if (this.map.has(String(sp.loc))) return false;
+		this.map.set(String(sp.loc),sp);
 		return true;
 	}
 	rm(loc){
@@ -41,6 +47,26 @@ class Spheres {
 			adj.push([loc[0]+con[0],loc[1]+con[1],loc[2]+con[2]]);
 		}
 		return adj;
+	}
+	adjacentSpheres(loc){
+		let adjs=[];
+		let adj=this.adjacent(loc);
+		for (let ad of adj){
+			if (this.has(ad)){
+				adjs.push(ad);
+			}
+		}
+		return adjs;
+	}
+	isadjacent(loc){
+		if (this.has(loc)) return false;
+		let adj=this.adjacent(loc);
+		for (let ad of adj){
+			if (this.has(ad)){
+				return true;
+			}
+		}
+		return false;
 	}
 	adjacentSpace(loc){
 		if (loc){
@@ -74,6 +100,7 @@ class Spheres {
 		}
 	}
 	addshells(n,col){
+		if (this.map.size==0) this.add([0,0,0]);
 		for (let i=0;i<n;i++){
 			this.addshell(col);
 		}
