@@ -11,6 +11,9 @@ class Screen {
 		this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 		this.cursor=[0,0,0];
 		this.marked=[];
+		let cursorobject = new THREE.Mesh( new THREE.BoxBufferGeometry( this.d,this.d/2,this.d/3 ), new THREE.MeshLambertMaterial( { color: 1 } ) );
+		this.scene.add( cursorobject );
+		this.objmap.set("cursor",cursorobject);
 	}
 	addspheres(spheres){
 		for (let sp of spheres.map.values()){
@@ -24,6 +27,11 @@ class Screen {
 				this.objmap.set(String(sp.loc),object);
 			}
 		}
+	}
+	rm(loc){
+		this.scene.remove(this.objmap.get(String(loc)));
+		this.objmap.remove(String(loc));
+		this.spheres.rm(loc);
 	}
 	mark(loc,col){
 		this.setemissive(loc,col||0xff);
@@ -40,9 +48,11 @@ class Screen {
 		for (let ad of this.spheres.adjacentSpheres(this.cursor)){
 			this.mark(ad);
 		}
+		let xyz=this.spheres.vox(this.cursor);
+		this.objmap.get("cursor").position.x=xyz[0];this.objmap.get("cursor").position.y=xyz[1];this.objmap.get("cursor").position.z=xyz[2];
 	}
 	movecursor(dir){
-		if (typeof(dir)=="number") dir=this.spheres.directions[dir];
+		if (typeof(dir)=="number") dir=this.spheres.connections[dir];
 		let nc=[this.cursor[0]+dir[0],this.cursor[1]+dir[1],this.cursor[2]+dir[2]];
 		if (this.spheres.has(this.cursor)){
 			for (let i=0;i<1000;i++){
@@ -61,6 +71,22 @@ class Screen {
 			}
 		}
 		return false;
+	}
+	cursorops(){
+		let move=[];
+		let dig=[];
+		for (let dir of this.spheres.connections){
+			let nc=[this.cursor[0]+dir[0],this.cursor[1]+dir[1],this.cursor[2]+dir[2]];
+			if (this.spheres.has(nc)){
+				dig.push(nc);
+			} else if (this.spheres.isadjacent(nc)){
+				move.push(nc);
+			}
+		}
+		return [move,dig];
+	}
+	excavate(){
+		this.rm(this.cursorops()[1][0]);
 	}
 	animate() {
 		if (screen.halt) return;

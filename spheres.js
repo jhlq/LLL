@@ -27,6 +27,14 @@ class Spheres {
 	has(loc){
 		return this.map.has(String(loc));
 	}
+	vox(loc) {
+		let x=loc[0]+loc[1]/2-loc[2]/2;
+		let h=Math.sqrt(3)/2;
+		let y=loc[1]*h-loc[2]*h/3;
+		let hz=Math.sqrt(6)/3;
+		let z=loc[2]*hz;
+		return [x*this.d,y*this.d,z*this.d];
+	}
 	add(loc,col){
 		let sp=0;
 		if (loc.loc!=undefined){
