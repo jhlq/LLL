@@ -7,13 +7,15 @@ class Screen {
 		this.spgeometry = new THREE.SphereGeometry( this.d/2, 32, 32 );
 		this.objmap=new Map();
 		this.spheres=new Spheres();
+		this.spheres.d=this.d;
 		this.halt=false;
 		this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 		this.cursor=[0,0,0];
 		this.marked=[];
-		let cursorobject = new THREE.Mesh( new THREE.BoxBufferGeometry( this.d,this.d/2,this.d/3 ), new THREE.MeshLambertMaterial( { color: 1 } ) );
+		let cursorobject = new THREE.Mesh( new THREE.BoxBufferGeometry( this.d/5,this.d/5,this.d/5 ), new THREE.MeshLambertMaterial( { color: 1 } ) );
 		this.scene.add( cursorobject );
 		this.objmap.set("cursor",cursorobject);
+		this.bots=[];
 	}
 	addspheres(spheres){
 		for (let sp of spheres.map.values()){
@@ -27,10 +29,85 @@ class Screen {
 				this.objmap.set(String(sp.loc),object);
 			}
 		}
+		this.render();
+	}
+	addsphere(sp){
+		if (this.spheres.add(sp)){
+			let object = new THREE.Mesh( this.spgeometry, new THREE.MeshLambertMaterial( { color: sp.col } ) );
+			let xyz=sp.xyz();
+			object.position.x = xyz[0]*this.d;
+			object.position.y = xyz[1]*this.d;
+			object.position.z = xyz[2]*this.d;
+			this.scene.add( object );
+			this.objmap.set(String(sp.loc),object);
+			this.render();
+		}
+	}
+	renderloc(loc){
+		let sp=this.spheres.get(loc);
+		if (sp){
+			let object = new THREE.Mesh( this.spgeometry, new THREE.MeshLambertMaterial( { color: sp.col } ) );
+			let xyz=sp.xyz();
+			object.position.x = xyz[0]*this.d;
+			object.position.y = xyz[1]*this.d;
+			object.position.z = xyz[2]*this.d;
+			this.scene.add( object );
+			this.objmap.set(String(sp.loc),object);
+			this.render();
+		}
+	}
+	addbot(){
+		let åb=new Ångbot(this.spheres,this.cursor);
+		this.bots.push(åb);
+		let botobject = new THREE.Mesh( new THREE.BoxBufferGeometry( this.d/3,this.d/3,this.d/3 ), new THREE.MeshLambertMaterial( { color: 0x5000aa } ) );
+		let botdir=new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3, screen.d,0xffff00,screen.d/1.5);
+		this.scene.add(botobject);
+		this.scene.add(botdir);
+		this.objmap.set("bot",botobject);
+		this.objmap.set("botdir",botdir);
+		this.updatebot();
+	}
+	updatebot(){
+		let åb=this.bots[0];
+		let l=this.spheres.vox(åb.loc);
+		let bo=this.objmap.get("bot");
+		bo.position.x=l[0];
+		bo.position.y=l[1];
+		bo.position.z=l[2];
+		let di=this.spheres.vox(åb.dir);
+		let bdi=this.objmap.get("botdir");
+		bdi.position.x=l[0];
+		bdi.position.y=l[1];
+		bdi.position.z=l[2];
+		bdi.setDirection(new THREE.Vector3(di[0],di[1],di[2]));
+		this.render();
+	}
+	turn(i){
+		this.bots[0].turn(i);
+		this.updatebot();
+	}
+	move(dir){
+		this.bots[0].move(dir);
+		this.updatebot();
+	}
+	dig(){
+		let sp=this.bots[0].excavate();
+		if (sp){
+			this.rm(sp);
+		}
+		this.updatebot();
+	}
+	place(){
+		let loc=this.bots[0].place();
+		if (loc){
+			this.renderloc(loc);
+		}
+		this.updatebot();
 	}
 	rm(loc){
+		loc=loc.loc||loc;
 		this.scene.remove(this.objmap.get(String(loc)));
-		this.objmap.remove(String(loc));
+		this.objmap.delete(String(loc));
 		this.spheres.rm(loc);
 	}
 	mark(loc,col){

@@ -20,6 +20,10 @@
 			<input type="range" min="0" max="1000" value="500" class="slider" id="zoom">
 			<label for="render">Enable mouse dragging </label>
 			<input type="checkbox" id="render" onchange="togglerender()">
+			<button onclick="screen.turn()">Turn (a)</button>
+			<button onclick="screen.move()">Move (w)</button>
+			<button onclick="screen.dig()">Dig (e)</button>
+			<button onclick="screen.place()">Place (p)</button>
 		</div>
 
 		<script src="http://threejs.org/build/three.min.js"></script>
@@ -61,10 +65,14 @@
 			init();
 			//screen.render();
 			//setcamera(20,10,3);
-			screen.setcamera(5,0,8);
+			screen.setcamera(0,0,18);
 			screen.movecursor([1,0,1]);
+			screen.addbot();
 			//animate();
 			togglerender();
+			//let dir=new THREE.Vector3(1,1,0);let origin=new THREE.Vector3(screen.cursor[0],screen.cursor[1],screen.cursor[2]);
+			//var arrowHelper = new THREE.ArrowHelper( dir, origin, screen.d,0xffff00,1/2);
+			//screen.scene.add( arrowHelper );
 
 			function init() {
 
@@ -80,25 +88,14 @@
 				var light2 = new THREE.AmbientLight( 0x222222 );
 				screen.scene.add( light2 );
 				var light = new THREE.DirectionalLight( 0x002288 );
-				light.position.set( - 1, - 1, - 1 );
+				light.position.set( -1, -1, -1 );
 				screen.scene.add( light );
 
-				//screen.d=10;
-				//var geometry = new THREE.SphereGeometry( screen.d/2, 32, 32 );
 				let sphs=new Spheres();
-				sphs.addshells(3);
-				sphs.addgridlines(9);
+				sphs.addshells(5);
+				//sphs.addgridlines(9);
 				screen.addspheres(sphs);
-				/*for (let sp of sphs.map.values()) {
-					let object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: sp.col } ) );
-					let xyz=sp.xyz();
-					object.position.x = xyz[0]*screen.d;
-					object.position.y = xyz[1]*screen.d;
-					object.position.z = xyz[2]*screen.d;
-					screen.scene.add( object );
-					screen.objmap.set(String(sp.loc),object);
-				}*/
-
+				
 				//raycaster = new THREE.Raycaster();
 
 				screen.renderer.setPixelRatio( window.devicePixelRatio );
@@ -139,7 +136,26 @@
 					screen.halt=true;
 				}
 			}
-			
+			document.body.addEventListener("keydown", keyDown, false);
+			function keyDown(e) {
+				var k = e.keyCode; 
+				//console.log(k);
+				if(k==83) { 
+					screen.move(-1);
+				} else if (k==65){ 
+					screen.turn();
+				} else if (k==80){ 
+					screen.place();
+				} else if (k==68){ 
+					screen.turn(-1);
+				} else if (k==69){ 
+					screen.dig();
+				} else if (k==87){ 
+					screen.move();
+				} else {
+					return 0;
+				}
+			}
 
 		</script>
 

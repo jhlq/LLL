@@ -22,10 +22,13 @@ class Spheres {
 		this.map=new Map();
 		//this.map.set(String([0,0,0]),new Sphere([0,0,0]));
 		this.d=d||1;
-		this.connections=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[1,-1,0],[-1,1,0], [0,0,1],[1,0,1],[0,1,1],[0,0,-1],[-1,0,-1],[0,-1,-1]];
+		this.connections=[[1,0,0],[0,0,-1],[0,1,0],[0,1,1],[-1,1,0],[-1,0,-1],[-1,0,0],[0,0,1],[0,-1,0],[0,-1,-1],[1,-1,0],[1,0,1]];
 	}
 	has(loc){
 		return this.map.has(String(loc));
+	}
+	get(loc){
+		return this.map.get(String(loc));
 	}
 	vox(loc) {
 		let x=loc[0]+loc[1]/2-loc[2]/2;
@@ -48,6 +51,17 @@ class Spheres {
 	}
 	rm(loc){
 		return this.map.delete(String(loc));
+	}
+	dirind(dir){
+		for (let i=0;i<this.connections.length;i++){
+			if (String(dir)==String(this.connections[i])){
+				return i;
+			}
+		}
+		return 0
+	}
+	next(dir){
+		return this.connections[(this.dirind(dir)+1)%this.connections.length];
 	}
 	adjacent(loc){
 		let adj=[];
@@ -124,20 +138,105 @@ class Spheres {
 		}
 	}
 };
-function gridlines(n){
-	let sphs=new Spheres
-	for (let i=0;i<n;i++){
-		sphs.add([i+1,0,0],0xff0000);
-		sphs.add([0,i+1,0],0x00ff00);
-		sphs.add([0,0,i+1],0x0000ff);
-		sphs.add([-(i+1),0,0],0x6f0000);
-		sphs.add([0,-(i+1),0],0x006f00);
-		sphs.add([0,0,-(i+1)],0x00006f);
+class Ångbot{
+	constructor(spheres,loc){
+		this.spheres=spheres;
+		this.loc=loc;
+		this.dir=[1,0,0];
 	}
-	return sphs;
+	turn(i){
+		if (!i){
+			this.dir=this.spheres.next(this.dir);
+		} else {
+			let cl=this.spheres.connections.length;
+			let diri=(this.spheres.dirind(this.dir)+i)%cl
+			if (diri<0) diri=cl+diri;
+			this.dir=this.spheres.connections[diri];
+		}
+	}
+	move(dir){
+		if (dir<0){
+			this.dir=[-this.dir[0],-this.dir[1],-this.dir[2]];
+			let moved=this.move();
+			this.dir=[-this.dir[0],-this.dir[1],-this.dir[2]];
+			return moved;
+		}
+		if (!dir){
+			if (this.move(this.dir)) return true;
+			for (let i=1;i<this.spheres.connections.length;i++){
+				this.turn();
+				if (this.move(this.dir)) return true;
+			}
+			return false
+		}
+		if (typeof(dir)=="number") dir=this.spheres.connections[dir];
+		let nc=[this.loc[0]+dir[0],this.loc[1]+dir[1],this.loc[2]+dir[2]];
+		if (this.spheres.has(this.loc)){
+			console.log("Ångbot is stuck inside a sphere, attempting to teleport out.");
+			for (let i=0;i<1000;i++){
+				if (!this.spheres.has(nc)){
+					this.loc=nc;
+					return true;
+				}
+				nc[0]+=dir[0];nc[1]+=dir[1];nc[2]+=dir[2];
+			}
+		} else {
+			if (this.spheres.isadjacent(nc)){
+				this.loc=nc;
+				return true;
+			}
+		}
+		return false;
+	}
+	ops(){
+		let move=[];
+		let dig=[];
+		for (let dir of this.spheres.connections){
+			let nc=[this.loc[0]+dir[0],this.loc[1]+dir[1],this.loc[2]+dir[2]];
+			if (this.spheres.has(nc)){
+				dig.push(nc);
+			} else if (this.spheres.isadjacent(nc)){
+				move.push(nc);
+			}
+		}
+		return [move,dig];
+	}
+	excavate(){
+		let l=vecplus(this.loc,this.dir);
+		if (this.spheres.has(l)){
+			this.spheres.rm(l);
+			return l;
+		}
+		for (let i=1;i<this.spheres.connections.length;i++){
+			this.turn();
+			l=vecplus(this.loc,this.dir);
+			if (this.spheres.has(l)){
+				this.spheres.rm(l);
+				return l;
+			}
+		}
+		return false
+	}
+	place(){
+		let l=vecplus(this.loc,this.dir);
+		if (!this.spheres.has(l)){
+			this.spheres.add(l);
+			return l;
+		}
+		for (let i=1;i<this.spheres.connections.length;i++){
+			this.turn();
+			l=vecplus(this.loc,this.dir);
+			if (!this.spheres.has(l)){
+				this.spheres.add(l);
+				return l;
+			}
+		}
+		return false
+	}
+		
 };
 function matmul(m,v){
-	nv=[];
+	let nv=[];
 	for (let row=0;row<m.length;row++){
 		let rc=0;
 		for (let col=0;col<v.length;col++){
@@ -147,7 +246,15 @@ function matmul(m,v){
 	}
 	return nv;
 };
-
+function vecplus(v,v2){
+	let nv=[];
+	let n=v2;
+	for (let row=0;row<v.length;row++){
+		if (v2.length!=undefined) n=v2[row];
+		nv.push(v[row]+n);
+	}
+	return nv;
+};
 function test(){
 	let sp=new Sphere([0,0,0]);
 	sp.hex()==[0,0,0];
