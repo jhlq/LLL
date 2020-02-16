@@ -18,111 +18,89 @@
 			<input type="range" min="0" max="1000" value="500" class="slider" id="yrotation">
 			<input type="range" min="0" max="1000" value="500" class="slider" id="zrotation">
 			<input type="range" min="0" max="1000" value="500" class="slider" id="zoom">
+			<label for="render">Enable mouse dragging </label>
+			<input type="checkbox" id="render" onchange="togglerender()">
+			<button onclick="screen.turn()">Turn (a)</button>
+			<button onclick="screen.move()">Move (w)</button>
+			<button onclick="screen.dig()">Dig (e)</button>
+			<button onclick="screen.place()">Place (p)</button>
 		</div>
 
 		<script src="http://threejs.org/build/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
 		<script src="spheres.js"></script>
+		<script src="screen.js"></script>
 		<script>
+			var screen=new Screen();
 			var sliderx = document.getElementById("xrotation");
 			sliderx.prevvalue=500;
 			sliderx.oninput = function() {
-				rotate((this.value-this.prevvalue)*Math.PI/500,0);
+				screen.rotate((this.value-this.prevvalue)*Math.PI/500,0);
 				this.prevvalue=this.value;
 			} 
 			var slidery = document.getElementById("yrotation");
 			slidery.prevvalue=500;
 			slidery.oninput = function() {
-				rotate((this.value-this.prevvalue)*Math.PI/500,1);
+				screen.rotate((this.value-this.prevvalue)*Math.PI/500,1);
 				this.prevvalue=this.value;
 			} 
 			var sliderz = document.getElementById("zrotation");
 			sliderz.prevvalue=500;
 			sliderz.oninput = function() {
-				rotate((this.value-this.prevvalue)*Math.PI/500,2);
+				screen.rotate((this.value-this.prevvalue)*Math.PI/500,2);
 				this.prevvalue=this.value;
 			} 
 			var sliderzoom = document.getElementById("zoom");
 			sliderzoom.prevvalue=500;
 			sliderzoom.oninput = function() {
-				zoom((this.value-this.prevvalue)/100);
+				screen.zoom((this.value-this.prevvalue)/100);
 				this.prevvalue=this.value;
 			} 
 		
 			var container;
-			var camera, scene, raycaster, renderer;
-
-			var mouse = new THREE.Vector2(), INTERSECTED;
-			var radius = 100, theta = 0;
-			let objmap=new Map();
+			//var raycaster;
+			//var mouse = new THREE.Vector2(), INTERSECTED;
+			//var radius = 100, theta = 0;
 
 			init();
-			render();
+			//screen.render();
 			//setcamera(20,10,3);
-			setcamera(0,0,100);
+			screen.setcamera(0,0,18);
+			screen.movecursor([1,0,1]);
+			screen.addbot();
 			//animate();
+			togglerender();
+			//let dir=new THREE.Vector3(1,1,0);let origin=new THREE.Vector3(screen.cursor[0],screen.cursor[1],screen.cursor[2]);
+			//var arrowHelper = new THREE.ArrowHelper( dir, origin, screen.d,0xffff00,1/2);
+			//screen.scene.add( arrowHelper );
 
 			function init() {
 
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
-				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
-
-				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0x0ff0f0 );
+				
+				screen.scene.background = new THREE.Color( 0x0ff0f0 );
 
 				var light = new THREE.DirectionalLight( 0xffffff, 1 );
 				light.position.set( 1, 1, 1 ).normalize();
-				scene.add( light );
+				screen.scene.add( light );
+				var light2 = new THREE.AmbientLight( 0x222222 );
+				screen.scene.add( light2 );
+				var light = new THREE.DirectionalLight( 0x002288 );
+				light.position.set( -1, -1, -1 );
+				screen.scene.add( light );
 
-				//var geometry = new THREE.BoxBufferGeometry( 20, 20, 20 );
-				let d=10;
-				var geometry = new THREE.SphereGeometry( d/2, 32, 32 );
+				let sphs=new Spheres();
+				sphs.addshells(5);
+				sphs.addgridlines(15);
+				screen.addspheres(sphs);
+				
+				//raycaster = new THREE.Raycaster();
 
-				for ( var i = 0; i < 3; i ++ ) {
-
-					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-
-					/*object.position.x = Math.random() * 800 - 400;
-					object.position.y = Math.random() * 800 - 400;
-					object.position.z = Math.random() * 800 - 400;
-
-					object.rotation.x = Math.random() * 2 * Math.PI;
-					object.rotation.y = Math.random() * 2 * Math.PI;
-					object.rotation.z = Math.random() * 2 * Math.PI;
-
-					object.scale.x = Math.random() + 0.5;
-					object.scale.y = Math.random() + 0.5;
-					object.scale.z = Math.random() + 0.5;*/
-
-					//scene.add( object );
-					var object2 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-
-					object2.position.x = i;//i-500;
-					object2.position.y = i;//i-500;
-					object2.position.z = -50;//Math.random();
-					scene.add( object2 );
-
-				}
-				let sphs=gridlines(9);
-				//let sphs=new Spheres();
-				sphs.addshell(0x000000);
-				for (let sp of sphs.map.values()) {
-					let object3 = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: sp.col } ) );
-					let xyz=sp.xyz();
-					object3.position.x = xyz[0]*d;
-					object3.position.y = xyz[1]*d;
-					object3.position.z = xyz[2]*d;
-					scene.add( object3 );
-					objmap.set(String(sp.loc),object3);
-				}
-
-				raycaster = new THREE.Raycaster();
-
-				renderer = new THREE.WebGLRenderer();
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( renderer.domElement );
+				screen.renderer.setPixelRatio( window.devicePixelRatio );
+				screen.renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( screen.renderer.domElement );
 
 				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
@@ -132,10 +110,11 @@
 
 			function onWindowResize() {
 
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
+				screen.camera.aspect = window.innerWidth / window.innerHeight;
+				screen.camera.updateProjectionMatrix();
 
-				renderer.setSize( window.innerWidth, window.innerHeight );
+				screen.renderer.setSize( window.innerWidth, window.innerHeight );
+				screen.render();
 
 			}
 
@@ -145,88 +124,47 @@
 
 				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+				screen.render();
 
 			}
-
-			function animate() {
-
-				requestAnimationFrame( animate );
-
-				render();
-			}
-			function setcamera(x,y,z){
-				camera.position.x = x;
-				camera.position.y = y;
-				camera.position.z = z;
-				/*camera.lookAt( scene.position );
-
-				camera.updateMatrixWorld();*/
-				render();
-			}
-			function rotate(th,ax){
-				let sinth=Math.sin(th);
-				let costh=Math.cos(th);
-				let v=[camera.position.x,camera.position.y,camera.position.z];
-				let m;
-				if (ax==0){
-					m=[[1,0,0],[0,costh,-sinth],[0,sinth,costh]];
-				} else if (ax==1){
-					m=[[costh,0,sinth],[0,1,0],[-sinth,0,costh]];
+			function togglerender(){
+				let rend=document.getElementById("render").checked;
+				if (rend){
+					screen.halt=false;
+					screen.animate();
 				} else {
-					m=[[costh,-sinth,0],[sinth,costh,0],[0,0,1]];
+					screen.halt=true;
 				}
-				let nv=matmul(m,v);
-				camera.position.x=nv[0];
-				camera.position.y=nv[1];
-				camera.position.z=nv[2];
-				render();
 			}
-			function zoom(frac){
-				let fac=1-frac;
-				if (fac<=0) return;
-				camera.position.x*=fac;
-				camera.position.y*=fac;
-				camera.position.z*=fac;
-				render();
-			}
-			function setcolor(loc,col){
-				objmap.get(String(loc)).material.color.setHex(col);
-				render();
-			}
-			function render() {
-
-				camera.lookAt( scene.position );
-
-				camera.updateMatrixWorld();
-
-				// find intersections
-
-				/*raycaster.setFromCamera( mouse, camera );
-
-				var intersects = raycaster.intersectObjects( scene.children );
-
-				if ( intersects.length > 0 ) {
-
-					if ( INTERSECTED != intersects[ 0 ].object ) {
-
-						if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-						INTERSECTED = intersects[ 0 ].object;
-						INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-						INTERSECTED.material.emissive.setHex( 0xff0000 );
-
-					}
-
+			document.body.addEventListener("keydown", keyDown, false);
+			function keyDown(e) {
+				var k = e.keyCode; 
+				//console.log(k);
+				if(k==83) { 
+					screen.move(-1);
+				} else if (k==65){ 
+					screen.turn();
+				} else if (k==80){ 
+					screen.place();
+				} else if (k==68){ 
+					screen.turn(-1);
+				} else if (k==69){ 
+					screen.dig();
+				} else if (k==87){ 
+					screen.move();
 				} else {
-
-					if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-					INTERSECTED = null;
-
-				}*/
-
-				renderer.render( scene, camera );
-
+					return 0;
+				}
+				relcam();
+			}
+			function relcam(){
+				let lookat=screen.spheres.vox(vecplus(screen.bots[0].loc,screen.bots[0].dir));
+				screen.lookAt.x=lookat[0];
+				screen.lookAt.y=lookat[1];
+				screen.lookAt.z=lookat[2];
+				let botloc=screen.spheres.vox(screen.bots[0].loc);
+				screen.setcamera(botloc[0],botloc[1],botloc[2]);
+				screen.zoom(-0.5);
 			}
 
 		</script>

@@ -144,7 +144,7 @@ class Ångbot{
 		this.loc=loc;
 		this.dir=[1,0,0];
 	}
-	turn(i){
+	rot(i){
 		if (!i){
 			this.dir=this.spheres.next(this.dir);
 		} else {
@@ -153,6 +153,19 @@ class Ångbot{
 			if (diri<0) diri=cl+diri;
 			this.dir=this.spheres.connections[diri];
 		}
+	}
+	turn(right){
+		let r=1;
+		if (right) r=-1;
+		this.rot(r);
+		let l=vecplus(this.loc,this.dir);
+		if (this.spheres.isadjacent(l)) return true;
+		for (let i=1;i<this.spheres.connections.length;i++){
+			this.rot(r);
+			l=vecplus(this.loc,this.dir);
+			if (this.spheres.isadjacent(l)) return true;
+		}
+		return false
 	}
 	move(dir){
 		if (dir<0){
@@ -164,7 +177,7 @@ class Ångbot{
 		if (!dir){
 			if (this.move(this.dir)) return true;
 			for (let i=1;i<this.spheres.connections.length;i++){
-				this.turn();
+				this.rot();
 				if (this.move(this.dir)) return true;
 			}
 			return false
@@ -208,7 +221,7 @@ class Ångbot{
 			return l;
 		}
 		for (let i=1;i<this.spheres.connections.length;i++){
-			this.turn();
+			this.rot();
 			l=vecplus(this.loc,this.dir);
 			if (this.spheres.has(l)){
 				this.spheres.rm(l);
@@ -224,7 +237,7 @@ class Ångbot{
 			return l;
 		}
 		for (let i=1;i<this.spheres.connections.length;i++){
-			this.turn();
+			this.rot();
 			l=vecplus(this.loc,this.dir);
 			if (!this.spheres.has(l)){
 				this.spheres.add(l);

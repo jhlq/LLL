@@ -16,6 +16,7 @@ class Screen {
 		this.scene.add( cursorobject );
 		this.objmap.set("cursor",cursorobject);
 		this.bots=[];
+		this.lookAt=new THREE.Vector3(0,0,0);
 	}
 	addspheres(spheres){
 		for (let sp of spheres.map.values()){
@@ -174,8 +175,6 @@ class Screen {
 		this.camera.position.x = x;
 		this.camera.position.y = y;
 		this.camera.position.z = z;
-		/*this.camera.lookAt( scene.position );
-		this.camera.updateMatrixWorld();*/
 		this.render();
 	}
 	rotate(th,ax){
@@ -213,7 +212,7 @@ class Screen {
 		this.render();
 	}
 	render() {
-		this.camera.lookAt( this.scene.position );
+		this.camera.lookAt( this.lookAt );
 		this.camera.updateMatrixWorld();
 		// find intersections. Requires offset calculations.
 		/*raycaster.setFromCamera( mouse, this.camera );
