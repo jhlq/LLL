@@ -159,6 +159,7 @@
 			}
 			function relcam(){
 				let lookat=screen.spheres.vox(vecplus(screen.bots[0].loc,screen.bots[0].dir));
+				//let lookat=screen.spheres.vox(screen.bots[0].loc);
 				screen.lookAt.x=lookat[0];
 				screen.lookAt.y=lookat[1];
 				screen.lookAt.z=lookat[2];

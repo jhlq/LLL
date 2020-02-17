@@ -17,6 +17,8 @@ class Screen {
 		this.objmap.set("cursor",cursorobject);
 		this.bots=[];
 		this.lookAt=new THREE.Vector3(0,0,0);
+		this.follow=-1;
+		this.camdis=5;
 	}
 	addspheres(spheres){
 		for (let sp of spheres.map.values()){
@@ -81,6 +83,7 @@ class Screen {
 		bdi.position.y=l[1];
 		bdi.position.z=l[2];
 		bdi.setDirection(new THREE.Vector3(di[0],di[1],di[2]));
+		this.updatecamera();
 		this.render();
 	}
 	turn(i){
@@ -177,10 +180,11 @@ class Screen {
 		this.camera.position.z = z;
 		this.render();
 	}
-	rotate(th,ax){
+	rotate(th,ax,p){
+		p=p||[this.lookAt.x,this.lookAt.y,this.lookAt.z];
 		let sinth=Math.sin(th);
 		let costh=Math.cos(th);
-		let v=[this.camera.position.x,this.camera.position.y,this.camera.position.z];
+		let v=[this.camera.position.x-p[0],this.camera.position.y-p[1],this.camera.position.z-p[2]];
 		let m;
 		if (ax==0){
 			m=[[1,0,0],[0,costh,-sinth],[0,sinth,costh]];
@@ -190,9 +194,10 @@ class Screen {
 			m=[[costh,-sinth,0],[sinth,costh,0],[0,0,1]];
 		}
 		let nv=matmul(m,v);
-		this.camera.position.x=nv[0];
-		this.camera.position.y=nv[1];
-		this.camera.position.z=nv[2];
+		this.camera.position.x=nv[0]+p[0];
+		this.camera.position.y=nv[1]+p[1];
+		this.camera.position.z=nv[2]+p[2];
+		this.camera.lookAt( this.lookAt );
 		this.render();
 	}
 	zoom(frac){
@@ -211,23 +216,21 @@ class Screen {
 		this.objmap.get(String(loc)).material.emissive.setHex(col);
 		this.render();
 	}
-	render() {
+	updatecamera() {
+		if (this.follow>=0){
+			//let lookat=this.spheres.vox(vecplus(this.bots[this.follow].loc,this.bots[this.follow].dir));
+			let lookat=this.spheres.vox(this.bots[this.follow].loc);
+			this.lookAt.x=lookat[0];
+			this.lookAt.y=lookat[1];
+			this.lookAt.z=lookat[2];
+			let botloc=this.spheres.vox(this.bots[this.follow].loc);
+			this.setcamera(botloc[0],botloc[1],botloc[2]+this.camdis);
+			//this.zoom(-0.5);
+		}
 		this.camera.lookAt( this.lookAt );
 		this.camera.updateMatrixWorld();
-		// find intersections. Requires offset calculations.
-		/*raycaster.setFromCamera( mouse, this.camera );
-		var intersects = raycaster.intersectObjects( this.scene.children );
-		if ( intersects.length > 0 ) {
-			if ( INTERSECTED != intersects[ 0 ].object ) {
-				if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-				INTERSECTED = intersects[ 0 ].object;
-				INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-				INTERSECTED.material.emissive.setHex( 0xff0000 );
-			}
-		} else {
-			if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-			INTERSECTED = null;
-		}*/
+	}
+	render() {
 		this.renderer.render( this.scene, this.camera );
 	}
 }

@@ -137,6 +137,21 @@ class Spheres {
 			this.add([0,0,-(i+1)],0x00006f);
 		}
 	}
+	addplane(xl,yl,z){
+		z=z||0;
+		for (let y=-yl;y<=yl;y++){
+			let loc;
+			for (let x=1;x<=xl;x++){
+				loc=[-x,y,z];
+				//this.map.set(String(loc),new Sphere(loc));
+			}
+			for (let x=-(xl-Math.abs(y));x<=xl;x++){
+				loc=[x,y,z];
+				if (y>0) loc[0]-=y;
+				this.map.set(String(loc),new Sphere(loc));
+			}
+		}
+	}
 };
 class Ångbot{
 	constructor(spheres,loc){
@@ -159,11 +174,11 @@ class Ångbot{
 		if (right) r=-1;
 		this.rot(r);
 		let l=vecplus(this.loc,this.dir);
-		if (this.spheres.isadjacent(l)) return true;
+		if (this.spheres.has(l) || this.spheres.isadjacent(l)) return true;
 		for (let i=1;i<this.spheres.connections.length;i++){
 			this.rot(r);
 			l=vecplus(this.loc,this.dir);
-			if (this.spheres.isadjacent(l)) return true;
+			if (this.spheres.has(l) || this.spheres.isadjacent(l)) return true;
 		}
 		return false
 	}
