@@ -24,36 +24,28 @@
 			<button onclick="screen.place()">Place (p)</button>
 		</div>
 
-		<script src="http://threejs.org/build/three.min.js"></script>
+		<script src="js/three.min.js"></script>
 		<script src="js/OrbitControls.js"></script>
 		<script src="spheres.js"></script>
 		<script src="screen.js"></script>
 		<script>
 			var screen=new Screen();
 			var sliderx = document.getElementById("xrotation");
-			sliderx.prevvalue=500;
 			sliderx.oninput = function() {
-				//screen.rotate((this.value-this.prevvalue)*Math.PI/500,0);
-				//this.prevvalue=this.value;
 				screen.rots[0]=(this.value-500)/1000*2*Math.PI;
 				screen.updatecamera();
 			} 
 			var slidery = document.getElementById("yrotation");
-			slidery.prevvalue=500;
 			slidery.oninput = function() {
-				//screen.rotate((this.value-this.prevvalue)*Math.PI/500,1);
-				//this.prevvalue=this.value;
 				screen.rots[1]=(this.value-500)/1000*2*Math.PI;
 				screen.updatecamera();
 			} 
 			var sliderz = document.getElementById("zrotation");
 			sliderz.oninput = function() {
-				//screen.rotate((this.value-this.prevvalue)*Math.PI/500,2);
 				screen.rots[2]=(this.value-500)/1000*2*Math.PI;
 				screen.updatecamera();
 			} 
 			var sliderzoom = document.getElementById("zoom");
-			sliderzoom.prevvalue=500;
 			sliderzoom.oninput = function() {
 				screen.camdis=this.value/100;
 				screen.updatecamera();
@@ -95,8 +87,8 @@
 				screen.renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( screen.renderer.domElement );
 
-				//document.addEventListener( 'mousedown', (event)=>toggleanim(true), false );
-				//document.addEventListener( 'mouseup', (event)=>toggleanim(false), false );
+				screen.renderer.domElement.addEventListener( 'mousedown', (event)=>toggleanim(true), false );
+				screen.renderer.domElement.addEventListener( 'mouseup', (event)=>toggleanim(false), false );
 
 				window.addEventListener( 'resize', onWindowResize, false );
 

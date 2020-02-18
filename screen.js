@@ -2,6 +2,7 @@ class Screen {
 	constructor(d){
 		this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
 		this.scene = new THREE.Scene();
+		this.scene.matrixAutoUpdate = false;
 		this.renderer = new THREE.WebGLRenderer();
 		this.d=d||1;
 		this.spgeometry = new THREE.SphereBufferGeometry( this.d/2, 8, 8 );
@@ -231,7 +232,7 @@ class Screen {
 			this.rotate(this.rots[2],2);
 		}
 		this.camera.lookAt( this.lookAt );
-		//this.camera.updateMatrixWorld();
+		this.camera.updateMatrixWorld();
 		this.render();
 	}
 	render() {
