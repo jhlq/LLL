@@ -23,12 +23,16 @@ class Spheres {
 		//this.map.set(String([0,0,0]),new Sphere([0,0,0]));
 		this.d=d||1;
 		this.connections=[[1,0,0],[0,0,-1],[0,1,0],[0,1,1],[-1,1,0],[-1,0,-1],[-1,0,0],[0,0,1],[0,-1,0],[0,-1,-1],[1,-1,0],[1,0,1]];
+		this.wraps=[9,9,9];
 	}
 	has(loc){
 		return this.map.has(String(loc));
 	}
 	get(loc){
 		return this.map.get(String(loc));
+	}
+	wrap(loc){
+		
 	}
 	vox(loc) {
 		let x=loc[0]+loc[1]/2-loc[2]/2;
@@ -158,25 +162,23 @@ class Ångbot{
 		this.spheres=spheres;
 		this.loc=loc;
 		this.dir=[1,0,0];
+		this.r=1;
 	}
 	rot(i){
-		if (!i){
-			this.dir=this.spheres.next(this.dir);
-		} else {
-			let cl=this.spheres.connections.length;
-			let diri=(this.spheres.dirind(this.dir)+i)%cl
-			if (diri<0) diri=cl+diri;
-			this.dir=this.spheres.connections[diri];
-		}
+		i=i||this.r;
+		let cl=this.spheres.connections.length;
+		let diri=(this.spheres.dirind(this.dir)+i)%cl
+		if (diri<0) diri=cl+diri;
+		this.dir=this.spheres.connections[diri];
 	}
 	turn(right){
-		let r=1;
-		if (right) r=-1;
-		this.rot(r);
+		this.r=1;
+		if (right) this.r=-1;
+		this.rot();
 		let l=vecplus(this.loc,this.dir);
 		if (this.spheres.has(l) || this.spheres.isadjacent(l)) return true;
 		for (let i=1;i<this.spheres.connections.length;i++){
-			this.rot(r);
+			this.rot();
 			l=vecplus(this.loc,this.dir);
 			if (this.spheres.has(l) || this.spheres.isadjacent(l)) return true;
 		}

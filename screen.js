@@ -4,7 +4,7 @@ class Screen {
 		this.scene = new THREE.Scene();
 		this.renderer = new THREE.WebGLRenderer();
 		this.d=d||1;
-		this.spgeometry = new THREE.SphereGeometry( this.d/2, 32, 32 );
+		this.spgeometry = new THREE.SphereBufferGeometry( this.d/2, 8, 8 );
 		this.objmap=new Map();
 		this.spheres=new Spheres();
 		this.spheres.d=this.d;
@@ -19,6 +19,7 @@ class Screen {
 		this.lookAt=new THREE.Vector3(0,0,0);
 		this.follow=-1;
 		this.camdis=5;
+		this.rots=[0,0,0];
 	}
 	addspheres(spheres){
 		for (let sp of spheres.map.values()){
@@ -170,9 +171,9 @@ class Screen {
 		this.rm(this.cursorops()[1][0]);
 	}
 	animate() {
-		if (screen.halt) return;
-		requestAnimationFrame( screen.animate );
-		screen.render();
+		if (this.halt) return;
+		requestAnimationFrame( this.animate.bind(this) );
+		this.render();
 	}
 	setcamera(x,y,z){
 		this.camera.position.x = x;
@@ -197,8 +198,8 @@ class Screen {
 		this.camera.position.x=nv[0]+p[0];
 		this.camera.position.y=nv[1]+p[1];
 		this.camera.position.z=nv[2]+p[2];
-		this.camera.lookAt( this.lookAt );
-		this.render();
+		//this.camera.lookAt( this.lookAt );
+		//this.render();
 	}
 	zoom(frac){
 		let fac=1-frac;
@@ -225,10 +226,13 @@ class Screen {
 			this.lookAt.z=lookat[2];
 			let botloc=this.spheres.vox(this.bots[this.follow].loc);
 			this.setcamera(botloc[0],botloc[1],botloc[2]+this.camdis);
-			//this.zoom(-0.5);
+			this.rotate(this.rots[0],0);
+			this.rotate(this.rots[1],1);
+			this.rotate(this.rots[2],2);
 		}
 		this.camera.lookAt( this.lookAt );
-		this.camera.updateMatrixWorld();
+		//this.camera.updateMatrixWorld();
+		this.render();
 	}
 	render() {
 		this.renderer.render( this.scene, this.camera );

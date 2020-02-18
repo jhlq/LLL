@@ -18,8 +18,6 @@
 			<input type="range" min="0" max="1000" value="500" class="slider" id="yrotation">
 			<input type="range" min="0" max="1000" value="500" class="slider" id="zrotation">
 			<input type="range" min="0" max="1000" value="500" class="slider" id="zoom">
-			<label for="render">Enable mouse dragging </label>
-			<input type="checkbox" id="render" onchange="togglerender()">
 			<button onclick="screen.turn()">Turn (a)</button>
 			<button onclick="screen.move()">Move (w)</button>
 			<button onclick="screen.dig()">Dig (e)</button>
@@ -35,50 +33,40 @@
 			var sliderx = document.getElementById("xrotation");
 			sliderx.prevvalue=500;
 			sliderx.oninput = function() {
-				screen.rotate((this.value-this.prevvalue)*Math.PI/500,0);
-				this.prevvalue=this.value;
+				//screen.rotate((this.value-this.prevvalue)*Math.PI/500,0);
+				//this.prevvalue=this.value;
+				screen.rots[0]=(this.value-500)/1000*2*Math.PI;
+				screen.updatecamera();
 			} 
 			var slidery = document.getElementById("yrotation");
 			slidery.prevvalue=500;
 			slidery.oninput = function() {
-				screen.rotate((this.value-this.prevvalue)*Math.PI/500,1);
-				this.prevvalue=this.value;
+				//screen.rotate((this.value-this.prevvalue)*Math.PI/500,1);
+				//this.prevvalue=this.value;
+				screen.rots[1]=(this.value-500)/1000*2*Math.PI;
+				screen.updatecamera();
 			} 
 			var sliderz = document.getElementById("zrotation");
-			sliderz.prevvalue=500;
 			sliderz.oninput = function() {
-				screen.rotate((this.value-this.prevvalue)*Math.PI/500,2);
-				this.prevvalue=this.value;
+				//screen.rotate((this.value-this.prevvalue)*Math.PI/500,2);
+				screen.rots[2]=(this.value-500)/1000*2*Math.PI;
+				screen.updatecamera();
 			} 
 			var sliderzoom = document.getElementById("zoom");
 			sliderzoom.prevvalue=500;
 			sliderzoom.oninput = function() {
 				screen.camdis=this.value/100;
 				screen.updatecamera();
-				screen.render();
-				//screen.zoom((this.value-this.prevvalue)/100);
-				this.prevvalue=this.value;
 			} 
 		
 			var container;
-			//var raycaster;
-			//var mouse = new THREE.Vector2(), INTERSECTED;
-			//var radius = 100, theta = 0;
-
 			init();
-			//screen.render();
-			//setcamera(20,10,3);
-			screen.setcamera(0,0,18);
 			screen.movecursor([1,0,1]);
 			screen.addbot();
-			//animate();
-			togglerender();
 			screen.follow=0;
+			screen.updatecamera();
 			screen.render();
-			//let dir=new THREE.Vector3(1,1,0);let origin=new THREE.Vector3(screen.cursor[0],screen.cursor[1],screen.cursor[2]);
-			//var arrowHelper = new THREE.ArrowHelper( dir, origin, screen.d,0xffff00,1/2);
-			//screen.scene.add( arrowHelper );
-
+			
 			function init() {
 
 				container = document.createElement( 'div' );
@@ -107,8 +95,8 @@
 				screen.renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( screen.renderer.domElement );
 
-				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-				document.addEventListener( 'mouseup', (event)=>screen.render(), false );
+				//document.addEventListener( 'mousedown', (event)=>toggleanim(true), false );
+				//document.addEventListener( 'mouseup', (event)=>toggleanim(false), false );
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
@@ -123,19 +111,8 @@
 				screen.render();
 
 			}
-
-			function onDocumentMouseMove( event ) {
-
-				event.preventDefault();
-
-				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-				screen.render();
-
-			}
-			function togglerender(){
-				let rend=document.getElementById("render").checked;
-				if (rend){
+			function toggleanim(bool){
+				if (bool){
 					screen.halt=false;
 					screen.animate();
 				} else {
