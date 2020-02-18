@@ -13,9 +13,9 @@ class Screen {
 		this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
 		this.cursor=[0,0,0];
 		this.marked=[];
-		let cursorobject = new THREE.Mesh( new THREE.BoxBufferGeometry( this.d/5,this.d/5,this.d/5 ), new THREE.MeshLambertMaterial( { color: 1 } ) );
-		this.scene.add( cursorobject );
-		this.objmap.set("cursor",cursorobject);
+		//let cursorobject = new THREE.Mesh( new THREE.BoxBufferGeometry( this.d/5,this.d/5,this.d/5 ), new THREE.MeshLambertMaterial( { color: 1 } ) );
+		//this.scene.add( cursorobject );
+		//this.objmap.set("cursor",cursorobject);
 		this.bots=[];
 		this.lookAt=new THREE.Vector3(0,0,0);
 		this.follow=-1;
@@ -141,7 +141,7 @@ class Screen {
 			for (let i=0;i<1000;i++){
 				if (!this.spheres.has(nc)){
 					this.cursor=nc;
-					this.cursormark();
+					//this.cursormark();
 					return true;
 				}
 				nc[0]+=dir[0];nc[1]+=dir[1];nc[2]+=dir[2];
@@ -149,7 +149,7 @@ class Screen {
 		} else {
 			if (this.spheres.isadjacent(nc)){
 				this.cursor=nc;
-				this.cursormark();
+				//this.cursormark();
 				return true;
 			}
 		}

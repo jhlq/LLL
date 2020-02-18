@@ -24,6 +24,7 @@ class Spheres {
 		this.d=d||1;
 		this.connections=[[1,0,0],[0,0,-1],[0,1,0],[0,1,1],[-1,1,0],[-1,0,-1],[-1,0,0],[0,0,1],[0,-1,0],[0,-1,-1],[1,-1,0],[1,0,1]];
 		this.wraps=[9,9,9];
+		this.colfuns=[x=>Math.abs(Math.sin(x*Math.PI/this.wraps[0])),y=>Math.abs(Math.sin(y*Math.PI/this.wraps[1])),z=>Math.abs(Math.sin(z*Math.PI/this.wraps[2]))];
 	}
 	has(loc){
 		return this.map.has(String(loc));
@@ -33,6 +34,11 @@ class Spheres {
 	}
 	wrap(loc){
 		
+	}
+	setcols(){
+		for (let sp of this.map.values()){
+			sp.col=((0xff0000*this.colfuns[0](sp.loc[0]))&0xff0000)+((0x00ff00*this.colfuns[1](sp.loc[1]))&0x00ff00)+((0x0000ff*this.colfuns[2](sp.loc[2]))&0x0000ff);
+		}
 	}
 	vox(loc) {
 		let x=loc[0]+loc[1]/2-loc[2]/2;

@@ -77,10 +77,11 @@
 				screen.scene.add( light );
 
 				let sphs=new Spheres();
-				for (let i=0;i<3;i++){
+				for (let i=0;i<9;i++){
 					sphs.addplane(9,7,-i);
 				}
 				//sphs.addgridlines(9);
+				sphs.setcols();
 				screen.addspheres(sphs);
 				
 				screen.renderer.setPixelRatio( window.devicePixelRatio );
