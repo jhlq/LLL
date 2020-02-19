@@ -24,6 +24,7 @@ class Spheres {
 		this.d=d||1;
 		this.connections=[[1,0,0],[0,0,-1],[0,1,0],[0,1,1],[-1,1,0],[-1,0,-1],[-1,0,0],[0,0,1],[0,-1,0],[0,-1,-1],[1,-1,0],[1,0,1]];
 		this.wraps=[9,9,9];
+		this.wrapped=false;
 		this.colfuns=[x=>Math.abs(Math.sin(x*Math.PI/this.wraps[0])),y=>Math.abs(Math.sin(y*Math.PI/this.wraps[1])),z=>Math.abs(Math.sin(z*Math.PI/this.wraps[2]))];
 	}
 	has(loc){
@@ -32,8 +33,24 @@ class Spheres {
 	get(loc){
 		return this.map.get(String(loc));
 	}
+	dist(loc,ori){
+		let hloc=[loc[0],-loc[0]-loc[1],loc[1]];
+		ori=ori||[0,0,0];
+		let hori=[ori[0],-ori[0]-ori[1],ori[1]];
+		return (Math.abs(hloc[0] - hori[0]) + Math.abs(hloc[1] - hori[1]) + Math.abs(hloc[2] - hori[2])) / 2;
+	}
 	wrap(loc){
-		
+		if (typeof(loc)=="string") return loc;
+		let nloc=[loc[0],loc[1],loc[2]];
+		let wrapxy=false;
+		let dis=this.dist(loc,[0,0,loc[2]]);
+		if (Math.abs(loc[0])==this.wraps[0] || Math.abs(loc[1])==this.wraps[1] || dis==Math.max(this.wraps[0],this.wraps[1])) wrapxy=true;
+		if (wrapxy){
+			nloc[0]=-loc[0];
+			nloc[1]=-loc[1];
+		}
+		if (Math.abs(loc[2])==this.wraps[2]) nloc[2]=-nloc[2];
+		return nloc;
 	}
 	setcols(){
 		for (let sp of this.map.values()){
@@ -206,7 +223,10 @@ class Ångbot{
 			return false
 		}
 		if (typeof(dir)=="number") dir=this.spheres.connections[dir];
+		let pw=this.spheres.wrapped;
+		this.loc=this.spheres.wrap(this.loc);
 		let nc=[this.loc[0]+dir[0],this.loc[1]+dir[1],this.loc[2]+dir[2]];
+		//if (pw!=this.spheres.wrapped) this.dir=[-dir[0],-dir[1],dir[2]];
 		if (this.spheres.has(this.loc)){
 			console.log("Ångbot is stuck inside a sphere, attempting to teleport out.");
 			for (let i=0;i<1000;i++){

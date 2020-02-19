@@ -115,6 +115,8 @@ class Screen {
 		this.scene.remove(this.objmap.get(String(loc)));
 		this.objmap.delete(String(loc));
 		this.spheres.rm(loc);
+		let wl=this.spheres.wrap(loc);
+		if (this.spheres.has(wl) && (wl[0]!=loc[0] || wl[1]!=loc[1] || wl[2]!=loc[2])) this.rm(wl);
 	}
 	mark(loc,col){
 		this.setemissive(loc,col||0xff);

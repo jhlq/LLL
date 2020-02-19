@@ -75,10 +75,12 @@
 				var light = new THREE.DirectionalLight( 0x002288 );
 				light.position.set( -1, -1, -1 );
 				screen.scene.add( light );
+				
+				screen.spheres.wraps=[4,7,9];
 
 				let sphs=new Spheres();
-				for (let i=0;i<9;i++){
-					sphs.addplane(9,7,-i);
+				for (let i=0;i<3;i++){
+					sphs.addplane(screen.spheres.wraps[0],screen.spheres.wraps[1],-i);
 				}
 				//sphs.addgridlines(9);
 				sphs.setcols();
