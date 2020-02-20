@@ -20,7 +20,7 @@ async function run() {
 		y: d.mpg,
 	}));
 
-	tfvis.render.scatterplot(
+	/*tfvis.render.scatterplot(
 		{name: 'Horsepower v MPG'},
 		{values}, 
 		{
@@ -28,7 +28,7 @@ async function run() {
 			yLabel: 'MPG',
 			height: 300
 		}
-	);
+	);*/
 
 	const model = createModel();	
 	tfvis.show.modelSummary({name: 'Model Summary'}, model);
@@ -50,10 +50,13 @@ function createModel() {
 	const model = tf.sequential(); 
 	
 	// Add a single hidden layer
-	model.add(tf.layers.dense({inputShape: [1], units: 1, useBias: true}));
+	model.add(tf.layers.dense({inputShape: [1], units: 10, useBias: true}));
+
+	model.add(tf.layers.dense({units: 50, activation: 'sigmoid', useBias: true}));
+	//model.add(tf.layers.dense({units: 50, activation: 'sigmoid', useBias: true}));
 	
 	// Add an output layer
-	model.add(tf.layers.dense({units: 1, useBias: true}));
+	model.add(tf.layers.dense({units: 1, activation: 'sigmoid', useBias: true}));
 
 	return model;
 }
