@@ -68,8 +68,9 @@ class AI{
 	createModel() {
 		const model = tf.sequential(); 
 		let bv=this.vectorize(this.b);
-		model.add(tf.layers.dense({inputShape: [bv.length], units: 10, useBias: true}));
+		model.add(tf.layers.dense({inputShape: [bv.length], units: 50, useBias: true}));
 		model.add(tf.layers.dense({units: 500, activation: 'sigmoid', useBias: true}));
+		model.add(tf.layers.dense({units: 50, activation: 'sigmoid', useBias: true}));
 		model.add(tf.layers.dense({units: 1, activation: 'sigmoid', useBias: true}));
 		return model;
 	}
@@ -110,7 +111,7 @@ class AI{
 		if (bc.winner==this.b.p+1) return 1;
 		if (!this.usemodel) return 0.5;
 		let ev=this.runModel(bc);
-		if (this.b.p==1) ev=1-ev;
+		if (this.b.p==0) ev=1-ev;
 		return ev;
 	}
 	evaluations(){
