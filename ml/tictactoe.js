@@ -48,7 +48,7 @@ class Board{
 class AI{
 	constructor(b){
 		this.b=b||new Board();
-		this.explore=true;
+		this.explore=0.3;
 		this.usemodel=true;
 		this.model=this.createModel();
 	}
@@ -64,6 +64,14 @@ class AI{
 			}
 		}
 		return v;
+	}
+	rotate(b){
+		b=b||this.b;
+		let rb=new Board();
+		rb.m[0]=[b.m[0][2],b.m[1][2],b.m[2][2]];
+		rb.m[1]=[b.m[0][1],b.m[1][1],b.m[2][1]];
+		rb.m[2]=[b.m[0][0],b.m[1][0],b.m[2][0]];
+		return rb;
 	}
 	createModel() {
 		const model = tf.sequential(); 
@@ -122,7 +130,11 @@ class AI{
 		return ev;
 	}
 	select(mps){
+		let m=Math.max(...mps);
 		if (this.explore){
+			for (let mi=0;mi<mps.length;mi++){
+				if (mps[mi]<m-this.explore) mps[mi]=0;
+			}
 			let sum=mps.reduce((t,p)=>t+=p);
 			let r=sum*Math.random();
 			let rs=0;
@@ -131,7 +143,6 @@ class AI{
 				if (rs>r) return mi;
 			}
 		} else {
-			let m=Math.max(...mps);
 			for (let mi=0;mi<mps.length;mi++){
 				if (mps[mi]==m) return mi;
 			}
@@ -147,13 +158,23 @@ class AI{
 	play(n){
 		if (!n) n=1;
 		let r=[];
+		let ob=this.b;
 		for (let ni=0;ni<n;ni++){
-			let ai=new AI(this.b.copy());
-			ai.place(9);
-			let t=ai.b.winner?(ai.b.winner-1):0.5;
-			r.push([ai.b.h,t]);
+			this.b=ob.copy();
+			this.place(9);
+			let t=this.b.winner?(this.b.winner-1):0.5;
+			r.push([this.b.h,t]);
 		}
+		this.b=ob;
 		return r;
+	}
+	avg(r){
+		let lr=r.length;
+		let sum=0;
+		for (let i=0;i<lr;i++){
+			sum+=r[i][1];
+		}
+		return sum/lr;
 	}
 	makedata(r){
 		let inp=[];
@@ -171,6 +192,37 @@ class AI{
 		}
 		return [inp,lab];
 	}
+	makeavgdata(its,plays,depth,checked){
+		checked=checked||[];
+		depth=depth||9;
+		plays=plays||10;
+		its=its||1;
+		let inp=[];
+		let lab=[];
+		let ob=this.b;
+		for (let it=0;it<its;it++){
+			this.b=ob.copy();
+			for (let dep=0;dep<depth;dep++){
+				this.place();
+				if (this.b.fin){
+					console.log(it+1);
+					this.b.print();
+					break;
+				}
+				let av=this.avg(this.play(plays));
+				inp.push(this.vectorize());
+				lab.push(av);
+				let tb=this.b;
+				for (let rot=0;rot<3;rot++){
+					tb=this.rotate(tb);
+					inp.push(this.vectorize(tb));
+					lab.push(av);
+				}
+			}
+		}
+		this.b=ob;
+		return [inp,lab];
+	}		
 }
 function time(){
 	let ai=new AI();
