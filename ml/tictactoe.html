@@ -14,6 +14,73 @@
 </head>
 
 <body>
+	<svg id="svg1" xmlns="http://www.w3.org/2000/svg" style="width: 5in; height: 5in">
+  <circle id="circle1" r="3" cx="34" cy="34" onclick="circle1.style.fill='yellow';"
+            style="fill: red; stroke: blue; stroke-width: 2"/>
+  </svg>
+  <p>Text</p>
 	
 </body>
+<script>
+	var d=90;
+	var svg = document.getElementById('svg1');
+	var newElement;
+	for (let col=0;col<3;col++){
+		for (let row=0;row<3;row++){
+			newElement = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); 
+			newElement.setAttribute("onclick","click("+col+","+row+");"); 
+			newElement.setAttribute("width",d);
+			newElement.setAttribute("height",d);
+			newElement.setAttribute("x",row*d);
+			newElement.setAttribute("y",col*d);
+			newElement.style.fill = "#fff"; 
+			svg.appendChild(newElement);
+		}
+	}
+	newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
+	newElement.setAttribute("d","M "+d+" 0 L "+d+" "+3*d); //Set path's data
+	newElement.style.stroke = "#000"; //Set stroke colour
+	newElement.style.strokeWidth = "5px"; //Set stroke width
+	svg.appendChild(newElement);
+	newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+	newElement.setAttribute("d","M "+2*d+" 0 L "+2*d+" "+3*d); 
+	newElement.style.stroke = "#000"; 
+	newElement.style.strokeWidth = "5px";
+	svg.appendChild(newElement);
+	newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+	newElement.setAttribute("d","M 0 "+d+" L "+3*d+" "+d); 
+	newElement.style.stroke = "#000"; 
+	newElement.style.strokeWidth = "5px";
+	svg.appendChild(newElement);
+	newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+	newElement.setAttribute("d","M 0 "+2*d+" L "+3*d+" "+2*d); 
+	newElement.style.stroke = "#000"; 
+	newElement.style.strokeWidth = "5px";
+	svg.appendChild(newElement);
+	function placeO(row,col){
+		newElement = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
+		newElement.setAttribute("r",d/3);
+		newElement.setAttribute("cx",col*d+d/2);
+		newElement.setAttribute("cy",row*d+d/2);
+		newElement.style.fill = "#fff"; 
+		newElement.style.stroke = "#00f"; 
+		newElement.style.strokeWidth = "9px";
+		svg.appendChild(newElement);
+	};
+	function placeX(row,col){
+		newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+		newElement.setAttribute("d","M "+(col*d+d/6)+" "+(row*d+d/6)+" L "+(col*d+5*d/6)+" "+(row*d+5*d/6)+
+									" M "+(col*d+5*d/6)+" "+(row*d+d/6)+" L "+(col*d+d/6)+" "+(row*d+5*d/6)); 
+		newElement.style.stroke = "#f00"; 
+		newElement.style.strokeWidth = "9px";
+		svg.appendChild(newElement);
+	};
+	var board=new Board();
+	function click(row,col){
+		if (board.place(row,col)){
+			board.print();
+			board.p?placeO(row,col):placeX(row,col);
+		}
+	};
+</script>
 </html>
