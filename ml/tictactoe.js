@@ -31,9 +31,7 @@ class Board{
 	print(){
 		let syms=[' ','O','X'];
 		console.log("\n"+syms[this.m[0][0]]+"|"+syms[this.m[0][1]]+"|"+syms[this.m[0][2]]);
-		//console.log("_____");
 		console.log(syms[this.m[1][0]]+"|"+syms[this.m[1][1]]+"|"+syms[this.m[1][2]]);
-		//console.log("_____");
 		console.log(syms[this.m[2][0]]+"|"+syms[this.m[2][1]]+"|"+syms[this.m[2][2]]);
 		console.log("O: 1, X: 2, Winner: "+this.winner);
 	}
@@ -232,7 +230,7 @@ class AI{
 		for (let m=0;m<9;m++){
 			tai.b=new Board(this.b.h);
 			if (!tai.b.place(m)) continue;
-			console.log(m);
+			//console.log(m);
 			let avg=tai.avg(tai.play(n));
 			inp.push(tai.vectorize());
 			tar.push(avg);
@@ -270,10 +268,16 @@ for (let m=0;m<9;m++){
 let stage1=JSON.parse("[[[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]],[0.24605,0.36945,0.25375,0.36915,0.1503,0.3704,0.2466,0.37735,0.24775]]");
 //let r=ai.trainModel(...stage1);
 var stage2;
-function run(){
-	ai.trainModel(...stage1);
+async function run(){
+	await ai.trainModel(...stage1);
 	ai.explore=0;
 	ai.place();
 	stage2=ai.randsims(1000);
-	ai.trainModel(...stage2);
+	await ai.trainModel(...stage2);
+	for (let i=0;i<3;i++){
+		ai.place();
+		ai.b.print();
+		let data=ai.randsims(1000);
+		await ai.trainModel(...data);
+	}
 };
