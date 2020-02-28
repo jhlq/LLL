@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+  <title>Audio</title>
+
+  <!-- Import TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+
+</head>
+
+<body>
+	https://github.com/tensorflow/tfjs-models/tree/master/speech-commands
+</body>
+
+<script>
+	async function a(){
+		const recognizer = speechCommands.create('BROWSER_FFT');
+
+		// Make sure that the underlying model and metadata are loaded via HTTPS
+		// requests.
+		await recognizer.ensureModelLoaded();
+
+		// See the array of words that the recognizer is trained to recognize.
+		console.log(recognizer.wordLabels());
+
+		// `listen()` takes two arguments:
+		// 1. A callback function that is invoked anytime a word is recognized.
+		// 2. A configuration object with adjustable fields such a
+		//    - includeSpectrogram
+		//    - probabilityThreshold
+		//    - includeEmbedding
+		recognizer.listen(result => {
+		  // - result.scores contains the probability scores that correspond to
+		  //   recognizer.wordLabels().
+		  // - result.spectrogram contains the spectrogram of the recognized word.
+		  console.log(result.scores);
+		}, {
+		  includeSpectrogram: true,
+		  probabilityThreshold: 0.5
+		});
+
+		// Stop the recognition in 10 seconds.
+		setTimeout(() => recognizer.stopListening(), 10e3);
+	}
+</script>
+</html>
