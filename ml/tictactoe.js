@@ -200,15 +200,16 @@ class AI{
 			for (let hi=0;hi<hn;hi++){
 				let tb=new Board(h);
 				if (this.datamap){
-					let key=JSON.stringify(tb.m);
-					let d=this.datamap.get(key);
-					if (d) d.push(target);//this.datamap.set(key,(d*9+target)/10);
-					else{
-						//let tai=new AI(tb);
-						//tai.usemodel=false;
-						//let avg=tai.avg(tai.play(1000));
-						this.datamap.set(key,[target]);
+					for (let rot=0;rot<4;rot++){
+						let key=JSON.stringify(tb.m);
+						let d=this.datamap.get(key);
+						if (d) this.datamap.set(key,(d+target)/2);
+						else{
+							this.datamap.set(key,target);
+						}
+						tb=this.rotate(tb);
 					}
+
 				} else {
 					inp.push(this.vectorize(tb));
 					lab.push(target);
@@ -311,6 +312,7 @@ for (let m=0;m<9;m++){
 	stage1[0].push(ai.vectorize());
 	stage1[1].push(avg);
 }*/
+/*
 let stage1=JSON.parse("[[[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]],[0.24605,0.36945,0.25375,0.36915,0.1503,0.3704,0.2466,0.37735,0.24775]]");
 //let r=ai.trainModel(...stage1);
 var stage2;
@@ -338,3 +340,18 @@ for (let d of da){
 	inp.push(tai.vectorize());
 	tar.push(Number(mst[1]));
 }
+
+let lost=0;
+tai.usemodel=false;
+for (let it=0;it<1000;it++){
+	tai.b=new Board();
+	ai.b=tai.b;
+	for (let m=0;m<9;m++){
+		tai.place();
+		ai.place();
+		if (ai.b.fin){
+			if (ai.b.winner==1) lost+=1;
+			break;
+		}
+	}
+}*/
