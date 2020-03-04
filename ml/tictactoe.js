@@ -88,9 +88,10 @@ class AI{
 		let bvt=tf.tensor2d(bv, [1, bv.length]);
 		return this.model.predict(bvt).dataSync()[0];
 	}
-	async trainModel(inputs, labels) {
+	async trainModel(inputs, labels,testfrac) {
 		let ll=labels.length;
-		let ntest=Math.floor(ll/10);
+		testfrac=testfrac||0.1;
+		let ntest=Math.floor(ll*testfrac);
 		let vali=inputs.slice(ll-ntest);
 		let valt=labels.slice(ll-ntest);
 		inputs=inputs.slice(0,ll-ntest);
@@ -168,13 +169,25 @@ class AI{
 			if (this.b.fin) break;
 		}
 	}
-	play(n){
+	play(n,aiopp){
 		if (!n) n=1;
 		let r=[];
 		let ob=this.b;
 		for (let ni=0;ni<n;ni++){
 			this.b=ob.copy();
-			this.place(9);
+			if (aiopp){
+				aiopp.b=this.b;
+				if (Math.random()>0.5) ai.place();
+				for (let m=0;m<9;m++){
+					aiopp.place();
+					ai.place();
+					if (ai.b.fin){
+						break;
+					}
+				}
+			} else {
+				this.place(9);
+			}
 			let t=this.b.winner?(this.b.winner-1):0.5;
 			r.push([this.b.h,t]);
 		}
@@ -189,8 +202,8 @@ class AI{
 		}
 		return sum/lr;
 	}
-	makedata(r){
-		if (typeof(r)=="number") r=this.play(r);
+	makedata(r,aiopp){
+		if (typeof(r)=="number") r=this.play(r,aiopp);
 		let inp=[];
 		let lab=[];
 		for (let ra of r){
@@ -340,18 +353,23 @@ for (let d of da){
 	inp.push(tai.vectorize());
 	tar.push(Number(mst[1]));
 }
-
-let lost=0;
-tai.usemodel=false;
-for (let it=0;it<1000;it++){
-	tai.b=new Board();
-	ai.b=tai.b;
-	for (let m=0;m<9;m++){
-		tai.place();
-		ai.place();
-		if (ai.b.fin){
-			if (ai.b.winner==1) lost+=1;
-			break;
+*/
+function evaluate(nit){
+	nit=nit||100;
+	let lost=0;
+	let tai=new AI();
+	tai.usemodel=false;
+	for (let it=0;it<nit;it++){
+		tai.b=new Board();
+		ai.b=tai.b;
+		for (let m=0;m<9;m++){
+			tai.place();
+			ai.place();
+			if (ai.b.fin){
+				if (ai.b.winner==1) lost+=1;
+				break;
+			}
 		}
 	}
-}*/
+	return lost/nit;
+}
