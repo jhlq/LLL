@@ -14,49 +14,56 @@
 </head>
 
 <body>
-	<svg id="svg1" xmlns="http://www.w3.org/2000/svg" style="width: 5in; height: 5in">
-  <circle id="circle1" r="3" cx="34" cy="34" onclick="circle1.style.fill='yellow';"
-            style="fill: red; stroke: blue; stroke-width: 2"/>
-  </svg>
-  <p>Text</p>
+	<svg id="svg1" xmlns="http://www.w3.org/2000/svg" style="width: 3in; height: 3in">
+	</svg>
+	<div style="width: 3in">
+	<p>OK, let's try training an AI to play tictactoe. Open up the javascript console and run the following command: ai.makedata(10000)</p>
+	<p>Initially the AI plays mostly randomly and so the above command plays 10000 random games and saves the result in ai.datamap. Note that if you placed some moves on the board it explores from that position, call reset() to reset the board.</p>
+	<p>The ai.datamap should now contain over 5000 examples, feed them to a neural network like so: ai.trainModel(...ai.parsedatamap())</p>
+	<p>Some graphs should appear, the training will take a while but after the default 100 epochs both training and validation error should have dropped below 0.1.</p>
+	<p>Confirm that the AI is better than random by calling evaluate() which returns a ratio of lost games as second player vs an untrained AI. The goal is to reduce this loss ratio to zero, since it is possible to never lose at tictactoe.</p>
 	
+	<p></p>
+	</div>
 </body>
 <script>
 	var d=90;
 	var svg = document.getElementById('svg1');
-	var newElement;
-	for (let col=0;col<3;col++){
-		for (let row=0;row<3;row++){
-			newElement = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); 
-			newElement.setAttribute("onclick","click("+col+","+row+");"); 
-			newElement.setAttribute("width",d);
-			newElement.setAttribute("height",d);
-			newElement.setAttribute("x",row*d);
-			newElement.setAttribute("y",col*d);
-			newElement.style.fill = "#fff"; 
-			svg.appendChild(newElement);
+	function setupsvg(){
+		var newElement;
+		for (let col=0;col<3;col++){
+			for (let row=0;row<3;row++){
+				newElement = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); 
+				newElement.setAttribute("onclick","click("+col+","+row+");"); 
+				newElement.setAttribute("width",d);
+				newElement.setAttribute("height",d);
+				newElement.setAttribute("x",row*d);
+				newElement.setAttribute("y",col*d);
+				newElement.style.fill = "#fff"; 
+				svg.appendChild(newElement);
+			}
 		}
+		newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
+		newElement.setAttribute("d","M "+d+" 0 L "+d+" "+3*d); //Set path's data
+		newElement.style.stroke = "#000"; //Set stroke colour
+		newElement.style.strokeWidth = "5px"; //Set stroke width
+		svg.appendChild(newElement);
+		newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+		newElement.setAttribute("d","M "+2*d+" 0 L "+2*d+" "+3*d); 
+		newElement.style.stroke = "#000"; 
+		newElement.style.strokeWidth = "5px";
+		svg.appendChild(newElement);
+		newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+		newElement.setAttribute("d","M 0 "+d+" L "+3*d+" "+d); 
+		newElement.style.stroke = "#000"; 
+		newElement.style.strokeWidth = "5px";
+		svg.appendChild(newElement);
+		newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
+		newElement.setAttribute("d","M 0 "+2*d+" L "+3*d+" "+2*d); 
+		newElement.style.stroke = "#000"; 
+		newElement.style.strokeWidth = "5px";
+		svg.appendChild(newElement);
 	}
-	newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
-	newElement.setAttribute("d","M "+d+" 0 L "+d+" "+3*d); //Set path's data
-	newElement.style.stroke = "#000"; //Set stroke colour
-	newElement.style.strokeWidth = "5px"; //Set stroke width
-	svg.appendChild(newElement);
-	newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
-	newElement.setAttribute("d","M "+2*d+" 0 L "+2*d+" "+3*d); 
-	newElement.style.stroke = "#000"; 
-	newElement.style.strokeWidth = "5px";
-	svg.appendChild(newElement);
-	newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
-	newElement.setAttribute("d","M 0 "+d+" L "+3*d+" "+d); 
-	newElement.style.stroke = "#000"; 
-	newElement.style.strokeWidth = "5px";
-	svg.appendChild(newElement);
-	newElement = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
-	newElement.setAttribute("d","M 0 "+2*d+" L "+3*d+" "+2*d); 
-	newElement.style.stroke = "#000"; 
-	newElement.style.strokeWidth = "5px";
-	svg.appendChild(newElement);
 	function placeO(row,col){
 		newElement = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
 		newElement.setAttribute("r",d/3);
@@ -76,11 +83,29 @@
 		svg.appendChild(newElement);
 	};
 	var board=new Board();
+	ai.b=board;
+	setupsvg();
 	function click(row,col){
+		if (typeof(col)=='undefined'){
+			col=row%3;
+			row=Math.floor(row/3);
+		}
 		if (board.place(row,col)){
-			board.print();
+			//board.print();
 			board.p?placeO(row,col):placeX(row,col);
 		}
+	};
+	function reset(){
+		svg.parentNode.replaceChild(svg.cloneNode(false), svg);
+		svg = document.getElementById('svg1');
+		board=new Board();
+		ai.b=board;
+		setupsvg();
+	}
+	function AIplay(){
+		ai.b=board;
+		let m=ai.select(ai.evaluations());
+		click(m);
 	};
 </script>
 </html>
