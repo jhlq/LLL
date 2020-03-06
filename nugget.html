@@ -20,10 +20,10 @@
 			<input type="range" min="0" max="1000" value="500" class="slider" id="zoom">
 			<label for="render">Enable mouse dragging </label>
 			<input type="checkbox" id="render" onchange="togglerender()">
-			<button onclick="screen.turn()">Turn (a)</button>
-			<button onclick="screen.move()">Move (w)</button>
-			<button onclick="screen.dig()">Dig (e)</button>
-			<button onclick="screen.place()">Place (p)</button>
+			<button onclick="cscreen.turn()">Turn (a)</button>
+			<button onclick="cscreen.move()">Move (w)</button>
+			<button onclick="cscreen.dig()">Dig (e)</button>
+			<button onclick="cscreen.place()">Place (p)</button>
 		</div>
 
 		<script src="js/three.min.js"></script>
@@ -31,29 +31,29 @@
 		<script src="spheres.js"></script>
 		<script src="screen.js"></script>
 		<script>
-			var screen=new Screen();
+			var cscreen=new CanvasScreen();
 			var sliderx = document.getElementById("xrotation");
 			sliderx.prevvalue=500;
 			sliderx.oninput = function() {
-				screen.rotate((this.value-this.prevvalue)*Math.PI/500,0);
+				cscreen.rotate((this.value-this.prevvalue)*Math.PI/500,0);
 				this.prevvalue=this.value;
 			} 
 			var slidery = document.getElementById("yrotation");
 			slidery.prevvalue=500;
 			slidery.oninput = function() {
-				screen.rotate((this.value-this.prevvalue)*Math.PI/500,1);
+				cscreen.rotate((this.value-this.prevvalue)*Math.PI/500,1);
 				this.prevvalue=this.value;
 			} 
 			var sliderz = document.getElementById("zrotation");
 			sliderz.prevvalue=500;
 			sliderz.oninput = function() {
-				screen.rotate((this.value-this.prevvalue)*Math.PI/500,2);
+				cscreen.rotate((this.value-this.prevvalue)*Math.PI/500,2);
 				this.prevvalue=this.value;
 			} 
 			var sliderzoom = document.getElementById("zoom");
 			sliderzoom.prevvalue=500;
 			sliderzoom.oninput = function() {
-				screen.zoom((this.value-this.prevvalue)/100);
+				cscreen.zoom((this.value-this.prevvalue)/100);
 				this.prevvalue=this.value;
 			} 
 		
@@ -63,16 +63,16 @@
 			//var radius = 100, theta = 0;
 
 			init();
-			//screen.render();
+			//cscreen.render();
 			//setcamera(20,10,3);
-			screen.setcamera(0,0,18);
-			screen.movecursor([1,0,1]);
-			screen.addbot();
+			cscreen.setcamera(0,0,18);
+			cscreen.movecursor([1,0,1]);
+			cscreen.addbot();
 			//animate();
 			togglerender();
-			//let dir=new THREE.Vector3(1,1,0);let origin=new THREE.Vector3(screen.cursor[0],screen.cursor[1],screen.cursor[2]);
-			//var arrowHelper = new THREE.ArrowHelper( dir, origin, screen.d,0xffff00,1/2);
-			//screen.scene.add( arrowHelper );
+			//let dir=new THREE.Vector3(1,1,0);let origin=new THREE.Vector3(cscreen.cursor[0],cscreen.cursor[1],cscreen.cursor[2]);
+			//var arrowHelper = new THREE.ArrowHelper( dir, origin, cscreen.d,0xffff00,1/2);
+			//cscreen.scene.add( arrowHelper );
 
 			function init() {
 
@@ -80,27 +80,27 @@
 				document.body.appendChild( container );
 
 				
-				screen.scene.background = new THREE.Color( 0x0ff0f0 );
+				cscreen.scene.background = new THREE.Color( 0x0ff0f0 );
 
 				var light = new THREE.DirectionalLight( 0xffffff, 1 );
 				light.position.set( 1, 1, 1 ).normalize();
-				screen.scene.add( light );
+				cscreen.scene.add( light );
 				var light2 = new THREE.AmbientLight( 0x222222 );
-				screen.scene.add( light2 );
+				cscreen.scene.add( light2 );
 				var light = new THREE.DirectionalLight( 0x002288 );
 				light.position.set( -1, -1, -1 );
-				screen.scene.add( light );
+				cscreen.scene.add( light );
 
 				let sphs=new Spheres();
 				sphs.addshells(5);
 				//sphs.addgridlines(9);
-				screen.addspheres(sphs);
+				cscreen.addspheres(sphs);
 				
 				//raycaster = new THREE.Raycaster();
 
-				screen.renderer.setPixelRatio( window.devicePixelRatio );
-				screen.renderer.setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( screen.renderer.domElement );
+				cscreen.renderer.setPixelRatio( window.devicePixelRatio );
+				cscreen.renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( cscreen.renderer.domElement );
 
 				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				document.addEventListener( 'mouseup', onDocMouseUp, false );
@@ -111,15 +111,15 @@
 
 			function onWindowResize() {
 
-				screen.camera.aspect = window.innerWidth / window.innerHeight;
-				screen.camera.updateProjectionMatrix();
+				cscreen.camera.aspect = window.innerWidth / window.innerHeight;
+				cscreen.camera.updateProjectionMatrix();
 
-				screen.renderer.setSize( window.innerWidth, window.innerHeight );
-				screen.render();
+				cscreen.renderer.setSize( window.innerWidth, window.innerHeight );
+				cscreen.render();
 
 			}
 			function onDocMouseUp(event){
-				screen.render();
+				cscreen.render();
 			}
 			function onDocumentMouseMove( event ) {
 
@@ -127,16 +127,16 @@
 
 				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-				screen.render();
+				cscreen.render();
 
 			}
 			function togglerender(){
 				let rend=document.getElementById("render").checked;
 				if (rend){
-					screen.halt=false;
-					screen.animate();
+					cscreen.halt=false;
+					cscreen.animate();
 				} else {
-					screen.halt=true;
+					cscreen.halt=true;
 				}
 			}
 			document.body.addEventListener("keydown", keyDown, false);
@@ -144,17 +144,17 @@
 				var k = e.keyCode; 
 				//console.log(k);
 				if(k==83) { 
-					screen.move(-1);
+					cscreen.move(-1);
 				} else if (k==65){ 
-					screen.turn();
+					cscreen.turn();
 				} else if (k==80){ 
-					screen.place();
+					cscreen.place();
 				} else if (k==68){ 
-					screen.turn(-1);
+					cscreen.turn(-1);
 				} else if (k==69){ 
-					screen.dig();
+					cscreen.dig();
 				} else if (k==87){ 
-					screen.move();
+					cscreen.move();
 				} else {
 					return 0;
 				}

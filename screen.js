@@ -1,4 +1,4 @@
-class Screen {
+class CanvasScreen {
 	constructor(d){
 		this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
 		this.scene = new THREE.Scene();
@@ -65,7 +65,7 @@ class Screen {
 		let åb=new Ångbot(this.spheres,this.cursor);
 		this.bots.push(åb);
 		let botobject = new THREE.Mesh( new THREE.BoxBufferGeometry( this.d/3,this.d/3,this.d/3 ), new THREE.MeshLambertMaterial( { color: 0x5000aa } ) );
-		let botdir=new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3, screen.d,0xffff00,screen.d/1.5);
+		let botdir=new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3(), this.d,0xffff00,this.d/1.5);
 		this.scene.add(botobject);
 		this.scene.add(botdir);
 		this.objmap.set("bot",botobject);
