@@ -255,7 +255,7 @@ class AI{
 		}
 		return [inp,lab];
 	}
-	makeavgdata(its,depth,plays){
+	createavgdata(its,depth,plays){
 		depth=depth||9;
 		plays=plays||10;
 		its=its||1;
