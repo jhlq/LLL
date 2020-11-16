@@ -12,6 +12,8 @@ class FIAR():
     if self.done or self.board[0][loc]!=0:
       return False
     self.nmoves+=1
+    if self.nmoves>=42:
+      self.done=True
     for i in range(6):
       if self.board[5-i][loc]==0:
         self.board[5-i][loc]=self.player
@@ -19,13 +21,6 @@ class FIAR():
             self.winner=self.player
             self.done=True
             return True
-        for u in range(2):
-          row=5-i-1+u
-          if (row>5 or row<0):
-            continue
-         # print(self.nmoves,"co",(row,loc-1))
-          
-          
         self.player+=1
         if self.player>2:
           self.player=1
@@ -78,7 +73,6 @@ class FIAR():
         p+=1
       else:
         break
-    print("p",p)
     if p>3:
       return True
     p=1
@@ -94,10 +88,36 @@ class FIAR():
         p+=1
       else:
         break
-    #print("p",p)
     if p>3:
       return True
     return False
       
   def observe(self):
     obs=np.array([])
+    if self.player==1:
+      obs=np.append(obs,(1,0))
+    else:
+      obs=np.append(obs,(0,1))
+    for i in range(len(self.board)):
+      for j in range(len(self.board[0])):
+        if self.board[i][j]==0:
+          obs=np.append(obs,(0,0))
+        elif self.board[i][j]==1:
+          obs=np.append(obs,(1,0))
+        elif self.board[i][j]==2:
+          obs=np.append(obs,(0,1))
+    return(obs)
+  def reset(self):
+    self.board=np.zeros((6,7))
+    self.player=1
+    self.winner=0
+    self.done=False
+    self.nmoves=0
+    return self.observe()
+  def step(self,loc):
+    self.place(loc)
+    if self.winner!=0:
+      return self.observe(),10,self.done
+    ri=np.random.randint(0,7)
+    self.place(ri) 
+    return self.observe(),-0.1,self.done
